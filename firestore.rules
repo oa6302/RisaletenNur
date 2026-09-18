@@ -1,0 +1,67 @@
+rules_version = '2';
+
+service cloud.firestore {
+  // Helper function MUST be inside service but outside matches
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  match /databases/{database}/documents {
+
+    /**
+     * ARTICLES
+     * Public read, authenticated write.
+     */
+    match /articles/{articleId} {
+      allow get, list: if true;
+      allow create: if isSignedIn(); // TODO: Add owner validation once schema is updated.
+      allow update, delete: if isSignedIn() && resource != null; // TODO: Owner check.
+    }
+
+    /**
+     * IMAGES
+     * Public read, authenticated create/delete, no updates.
+     */
+    match /images/{imageId} {
+      allow get, list: if true;
+      allow create, delete: if isSignedIn();
+      allow update: if false;
+    }
+
+    /**
+     * CATEGORIES
+     * Public read, writes blocked.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * TOPICS
+     * Public read, writes blocked.
+     */
+    match /topics/{topicId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * TAGS
+     * Public read, writes blocked.
+     */
+    match /tags/{tagId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * NEWSLETTER SUBSCRIPTIONS
+     * Public create allowed, all other access blocked.
+     */
+    match /newsletterSubscriptions/{subscriptionId} {
+      allow create: if true;
+      allow get, list, update, delete: if false;
+    }
+  }
+}
