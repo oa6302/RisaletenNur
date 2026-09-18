@@ -2,34 +2,37 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
 import {
   Share2,
   Download,
   MessageCircle,
   Heart,
 } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import type { Article } from '@/lib/placeholder-data';
-import { Badge } from './ui/badge';
+
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 
 interface VecizeCardProps {
-  article: Article & { card_scale?: number };
+  article: Article & {
+    card_scale?: number;
+  };
 
-  /**
-   * Paylaş butonuna basıldığında çalışır.
-   */
-  onShareClick?: (event: React.MouseEvent) => void;
+  onShareClick?: (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => void;
 
-  /**
-   * İndirme butonuna basıldığında çalışır.
-   * Eğer verilmezse bilgilendirme mesajı gösterilir.
-   */
-  onDownloadClick?: (event: React.MouseEvent) => void;
+  onDownloadClick?: (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => void;
 
   className?: string;
   isFeatured?: boolean;
@@ -49,33 +52,45 @@ export function VecizeCard({
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  const scale =
-    typeof article.card_scale === 'number' && article.card_scale > 0
+  // =========================================================
+  // ÖLÇEK
+  // =========================================================
+
+  const scale = useMemo(() => {
+    return typeof article.card_scale === 'number' &&
+      article.card_scale > 0
       ? article.card_scale
       : 1;
+  }, [article.card_scale]);
 
-  /**
-   * Osmanlıca font sınıfları.
-   */
-  const fontClasses: Record<string, string> = {
-    Rika: 'font-rika font-bold',
-    Matbu: 'font-osmanlica font-bold',
-    'Scheherazade New': 'font-osmanlica font-bold',
-  };
+  // =========================================================
+  // FONT
+  // =========================================================
 
-  const fontClass =
-    fontClasses[article.ottoman_font_family] ||
-    'font-osmanlica font-bold';
+  const fontClass = useMemo(() => {
+    const fontMap: Record<string, string> = {
+      Rika: 'font-rika font-bold',
+      Matbu: 'font-osmanlica font-bold',
+      'Scheherazade New':
+        'font-osmanlica font-bold',
+    };
 
-  /**
-   * Kart minimum yüksekliği.
-   */
-  const getMinHeight = useCallback(() => {
+    return (
+      fontMap[article.ottoman_font_family] ??
+      'font-osmanlica font-bold'
+    );
+  }, [article.ottoman_font_family]);
+
+  // =========================================================
+  // KART YÜKSEKLİĞİ
+  // =========================================================
+
+  const minHeight = useMemo(() => {
     if (isForDownload) {
       return 'auto';
     }
 
-    const baseMin = isFeatured
+    const baseHeight = isFeatured
       ? isMobile
         ? 320
         : 440
@@ -83,13 +98,19 @@ export function VecizeCard({
         ? 280
         : 380;
 
-    return `${baseMin * scale}px`;
-  }, [isForDownload, isFeatured, isMobile, scale]);
+    return `${baseHeight * scale}px`;
+  }, [
+    isForDownload,
+    isFeatured,
+    isMobile,
+    scale,
+  ]);
 
-  /**
-   * Osmanlıca metin boyutu.
-   */
-  const getOttomanFontSize = useCallback(() => {
+  // =========================================================
+  // OSMANLICA FONT BOYUTU
+  // =========================================================
+
+  const ottomanFontSize = useMemo(() => {
     const baseSize =
       typeof article.ottoman_font_size === 'number'
         ? article.ottoman_font_size
@@ -99,9 +120,11 @@ export function VecizeCard({
       return `${baseSize * 1.8}px`;
     }
 
-    const mobileScale = isMobile ? 0.8 : 1;
+    const responsiveScale = isMobile ? 0.8 : 1;
 
-    return `${baseSize * mobileScale * scale}px`;
+    return `${
+      baseSize * responsiveScale * scale
+    }px`;
   }, [
     article.ottoman_font_size,
     isForDownload,
@@ -109,10 +132,11 @@ export function VecizeCard({
     scale,
   ]);
 
-  /**
-   * Türkçe metin boyutu.
-   */
-  const getTurkishFontSize = useCallback(() => {
+  // =========================================================
+  // TÜRKÇE FONT BOYUTU
+  // =========================================================
+
+  const turkishFontSize = useMemo(() => {
     const baseSize =
       typeof article.content_font_size === 'number'
         ? article.content_font_size
@@ -122,9 +146,11 @@ export function VecizeCard({
       return `${baseSize * 1.5}px`;
     }
 
-    const mobileScale = isMobile ? 0.9 : 1;
+    const responsiveScale = isMobile ? 0.9 : 1;
 
-    return `${baseSize * mobileScale * scale}px`;
+    return `${
+      baseSize * responsiveScale * scale
+    }px`;
   }, [
     article.content_font_size,
     isForDownload,
@@ -132,150 +158,200 @@ export function VecizeCard({
     scale,
   ]);
 
-  /**
-   * Prompt içerisindeki gereksiz dış tırnakları temizler.
-   */
-  const cleanPrompt = useCallback((text: string) => {
-    if (!text) return '';
+  // =========================================================
+  // PROMPT TEMİZLEME
+  // =========================================================
 
-    return text
-      .trim()
-      .replace(/^["'“”„]+|["'“”„]+$/g, '');
-  }, []);
+  const cleanPrompt = useCallback(
+    (text: string) => {
+      if (!text) return '';
 
-  /**
-   * Like / comment gibi henüz aktif olmayan aksiyonlar.
-   */
-  const handleActionClick = (
-    event: React.MouseEvent,
-    type: 'comment' | 'like'
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
+      return text
+        .trim()
+        .replace(
+          /^["'“”„]+|["'“”„]+$/g,
+          ''
+        );
+    },
+    []
+  );
 
-    const messages = {
-      like: {
-        title: 'Beğeni Sistemi',
-        description:
-          'Beğeni özelliği çok yakında sizlerle olacaktır.',
-      },
-      comment: {
-        title: 'Yorum Sistemi',
-        description:
-          'Yorum özelliği çok yakında sizlerle olacaktır.',
-      },
-    };
+  // =========================================================
+  // AKSİYONLAR
+  // =========================================================
 
-    toast(messages[type]);
-  };
+  const handleActionClick = useCallback(
+    (
+      event: React.MouseEvent<HTMLButtonElement>,
+      type: 'comment' | 'like'
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-  /**
-   * Paylaşma işlemi.
-   */
-  const handleShare = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
+      const messages = {
+        like: {
+          title: 'Beğeni Sistemi',
+          description:
+            'Beğeni özelliği çok yakında sizlerle olacaktır.',
+        },
+        comment: {
+          title: 'Yorum Sistemi',
+          description:
+            'Yorum özelliği çok yakında sizlerle olacaktır.',
+        },
+      };
 
-    if (onShareClick) {
-      onShareClick(event);
-      return;
-    }
+      toast(messages[type]);
+    },
+    [toast]
+  );
 
-    /**
-     * Parent tarafından paylaşım fonksiyonu verilmemişse
-     * mevcut URL'yi panoya kopyalamayı deneriz.
-     */
-    if (
-      typeof navigator !== 'undefined' &&
-      navigator.clipboard?.writeText
-    ) {
-      navigator.clipboard
-        .writeText(window.location.href)
-        .then(() => {
+  // =========================================================
+  // PAYLAŞ
+  // =========================================================
+
+  const handleShare = useCallback(
+    async (
+      event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (onShareClick) {
+        onShareClick(event);
+        return;
+      }
+
+      if (
+        typeof window === 'undefined' ||
+        typeof navigator === 'undefined'
+      ) {
+        return;
+      }
+
+      const url = window.location.href;
+
+      // Native Share API
+      if (
+        navigator.share &&
+        isMobile
+      ) {
+        try {
+          await navigator.share({
+            title:
+              article.title ||
+              'RisaletenNur Platformu',
+            text:
+              cleanPrompt(article.prompt || ''),
+            url,
+          });
+
+          return;
+        } catch {
+          // Kullanıcı paylaşımı iptal ettiyse
+          return;
+        }
+      }
+
+      // Clipboard fallback
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(url);
+
           toast({
             title: 'Bağlantı Kopyalandı',
             description:
               'Vecize bağlantısı panoya kopyalandı.',
           });
-        })
-        .catch(() => {
+        } catch {
           toast({
             title: 'Paylaşım Başarısız',
             description:
               'Bağlantı kopyalanırken bir hata oluştu.',
             variant: 'destructive',
           });
-        });
-    }
-  };
+        }
+      }
+    },
+    [
+      article.title,
+      article.prompt,
+      cleanPrompt,
+      isMobile,
+      onShareClick,
+      toast,
+    ]
+  );
 
-  /**
-   * İndirme işlemi.
-   */
-  const handleDownload = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
+  // =========================================================
+  // İNDİR
+  // =========================================================
 
-    if (onDownloadClick) {
-      onDownloadClick(event);
-      return;
-    }
+  const handleDownload = useCallback(
+    (
+      event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    toast({
-      title: 'İndirme Sistemi',
-      description:
-        'Görsel indirme işlemi için indirme fonksiyonu bağlanmalıdır.',
-    });
-  };
+      if (onDownloadClick) {
+        onDownloadClick(event);
+        return;
+      }
 
-  /**
-   * Kartın ana içeriği.
-   */
-  const CardContent = (
+      toast({
+        title: 'İndirme Sistemi',
+        description:
+          'Görsel indirme işlemi için indirme fonksiyonu bağlanmalıdır.',
+      });
+    },
+    [onDownloadClick, toast]
+  );
+
+  // =========================================================
+  // KART İÇERİĞİ
+  // =========================================================
+
+  const card = (
     <Card
       className={cn(
-        `
-          relative
-          flex
-          h-full
-          w-full
-          flex-col
-          justify-between
-          bg-white
-          text-center
-          transition-all
-          duration-500
-          group/card
-          border-none
-        `,
+        'relative flex h-full w-full flex-col',
+        'justify-between overflow-hidden',
+        'bg-white text-center',
+        'border-none',
+        'transition-all duration-500',
+        'group/card',
+
         isForDownload
-          ? 'rounded-none shadow-none p-16'
-          : 'p-6 md:p-8 shadow-deep',
+          ? 'rounded-none p-16 shadow-none'
+          : 'rounded-[2.5rem] p-6 md:p-8 shadow-deep',
+
         className
       )}
       style={{
-        minHeight: getMinHeight(),
+        minHeight,
         borderRadius: isForDownload
-          ? '0'
+          ? 0
           : `${2.5 * scale}rem`,
       }}
     >
-      {/* =======================================================
+      {/* =====================================================
           HOVER AKSİYONLARI
-      ======================================================== */}
+      ====================================================== */}
+
       {!isForDownload && (
         <div
           className="
             absolute
-            top-4
             right-4
-            z-10
+            top-4
+            z-20
             flex
             gap-2
             opacity-0
-            group-hover/card:opacity-100
             transition-all
-            duration-500
+            duration-300
+            group-hover/card:opacity-100
           "
           data-html2canvas-ignore="true"
           style={{
@@ -283,23 +359,20 @@ export function VecizeCard({
             right: `${6 * scale}px`,
           }}
         >
-          {/* PAYLAŞ */}
           <Button
             type="button"
             variant="secondary"
             size="icon"
             aria-label="Vecizeyi paylaş"
             className="
-              h-8
-              w-8
+              rounded-full
+              border-none
               bg-white/95
+              shadow-md
               backdrop-blur-md
+              transition-all
               hover:bg-primary
               hover:text-white
-              border-none
-              shadow-md
-              rounded-full
-              transition-all
             "
             style={{
               width: `${32 * scale}px`,
@@ -315,22 +388,19 @@ export function VecizeCard({
             />
           </Button>
 
-          {/* İNDİR */}
           <Button
             type="button"
             variant="secondary"
             size="icon"
             aria-label="Vecizeyi indir"
             className="
-              h-8
-              w-8
-              bg-white/95
-              backdrop-blur-md
-              hover:bg-slate-100
-              border-none
-              shadow-md
               rounded-full
+              border-none
+              bg-white/95
+              shadow-md
+              backdrop-blur-md
               transition-all
+              hover:bg-slate-100
             "
             style={{
               width: `${32 * scale}px`,
@@ -349,110 +419,121 @@ export function VecizeCard({
         </div>
       )}
 
-      {/* =======================================================
+      {/* =====================================================
           ÜST ROZET
-      ======================================================== */}
+      ====================================================== */}
+
       <div
-        className={cn(
-          'w-full flex flex-col items-center shrink-0',
-          isForDownload ? 'pt-4' : 'pt-2'
-        )}
-        style={
-          !isForDownload
-            ? {
-                paddingTop: `${4 * scale}px`,
-              }
-            : undefined
-        }
+        className="
+          flex
+          w-full
+          shrink-0
+          flex-col
+          items-center
+        "
+        style={{
+          paddingTop: isForDownload
+            ? '16px'
+            : `${4 * scale}px`,
+        }}
       >
         <Badge
           className="
+            rounded-full
+            border-none
             bg-[#f97316]
-            hover:bg-[#f97316]
-            !text-white
             font-black
             uppercase
             tracking-[0.25em]
-            rounded-full
-            border-none
+            !text-white
             shadow-[0_10px_25px_rgba(249,115,22,0.35)]
             text-shadow-heavy
           "
           style={
-            !isForDownload
+            isForDownload
               ? {
-                  fontSize: `${
-                    (isMobile ? 9 : 11) * scale
-                  }px`,
-                  paddingTop: `${6 * scale}px`,
-                  paddingBottom: `${6 * scale}px`,
-                  paddingLeft: `${
-                    (isMobile ? 20 : 36) * scale
-                  }px`,
-                  paddingRight: `${
-                    (isMobile ? 20 : 36) * scale
-                  }px`,
-                }
-              : {
                   fontSize: '24px',
                   padding: '16px 64px',
                 }
+              : {
+                  fontSize: `${
+                    (isMobile ? 9 : 11) *
+                    scale
+                  }px`,
+                  paddingTop: `${
+                    6 * scale
+                  }px`,
+                  paddingBottom: `${
+                    6 * scale
+                  }px`,
+                  paddingLeft: `${
+                    (isMobile ? 20 : 36) *
+                    scale
+                  }px`,
+                  paddingRight: `${
+                    (isMobile ? 20 : 36) *
+                    scale
+                  }px`,
+                }
           }
         >
-          {isFeatured ? 'GÜNÜN VECİZESİ' : 'HAKİKAT'}
+          {isFeatured
+            ? 'GÜNÜN VECİZESİ'
+            : 'HAKİKAT'}
         </Badge>
       </div>
 
-      {/* =======================================================
-          ORTA METİN ALANI
-      ======================================================== */}
+      {/* =====================================================
+          ANA METİN
+      ====================================================== */}
+
       <div
         className="
-          flex-grow
           flex
+          flex-1
+          w-full
           flex-col
           items-center
           justify-center
-          w-full
-          my-4
+          text-center
         "
-        style={
-          !isForDownload
-            ? {
-                gap: `${(isMobile ? 8 : 12) * scale}px`,
-                paddingLeft: `${
-                  (isMobile ? 8 : 24) * scale
-                }px`,
-                paddingRight: `${
-                  (isMobile ? 8 : 24) * scale
-                }px`,
-              }
-            : {
-                gap: '24px',
-                padding: '16px 48px',
-              }
-        }
+        style={{
+          gap: isForDownload
+            ? '24px'
+            : `${(isMobile ? 8 : 12) * scale}px`,
+          marginTop: isForDownload
+            ? '24px'
+            : `${16 * scale}px`,
+          marginBottom: isForDownload
+            ? '24px'
+            : `${16 * scale}px`,
+          paddingLeft: isForDownload
+            ? '48px'
+            : `${(isMobile ? 8 : 24) * scale}px`,
+          paddingRight: isForDownload
+            ? '48px'
+            : `${(isMobile ? 8 : 24) * scale}px`,
+        }}
       >
-        {/* OSMANLICA / RİKA */}
+        {/* =================================================
+            OSMANLICA
+        ================================================== */}
+
         {article.ottomanContent && (
           <p
             className={cn(
-              `
-                leading-[1.8]
-                transition-colors
-                duration-500
-                w-full
-                whitespace-pre-wrap
-                text-shadow-heavy
-                text-slate-900
-                tracking-wide
-                font-bold
-              `,
+              'w-full',
+              'whitespace-pre-wrap',
+              'leading-[1.8]',
+              'tracking-wide',
+              'font-bold',
+              'text-slate-900',
+              'text-shadow-heavy',
               fontClass
             )}
             style={{
               direction: 'rtl',
-              fontSize: getOttomanFontSize(),
+              fontSize: ottomanFontSize,
               color:
                 article.ottoman_font_color ||
                 '#0f172a',
@@ -462,21 +543,24 @@ export function VecizeCard({
           </p>
         )}
 
-        {/* TÜRKÇE ANLAMI */}
-        <div className="w-full max-w-2xl mx-auto">
+        {/* =================================================
+            TÜRKÇE ANLAM
+        ================================================== */}
+
+        <div className="mx-auto w-full max-w-2xl">
           <p
             className="
+              px-4
               text-balance
-              text-slate-900
               font-bold
               italic
               leading-relaxed
               whitespace-pre-wrap
+              text-slate-900
               text-shadow-heavy
-              px-4
             "
             style={{
-              fontSize: getTurkishFontSize(),
+              fontSize: turkishFontSize,
               fontFamily:
                 'var(--font-inter), sans-serif',
             }}
@@ -486,66 +570,63 @@ export function VecizeCard({
         </div>
       </div>
 
-      {/* =======================================================
-          ALT ETKİLEŞİM
-      ======================================================== */}
-      <div className="flex flex-col items-center w-full shrink-0 mt-auto">
+      {/* =====================================================
+          ALT ALAN
+      ====================================================== */}
+
+      <div className="mt-auto flex w-full shrink-0 flex-col items-center">
         {/* LIKE / COMMENT */}
+
         <div
           className="
-            w-full
             flex
+            w-full
             items-center
             justify-center
             text-slate-900/90
           "
-          style={
-            !isForDownload
-              ? {
-                  gap: `${24 * scale}px`,
-                  marginBottom: `${10 * scale}px`,
-                }
-              : {
-                  gap: '40px',
-                  marginBottom: '16px',
-                }
-          }
+          style={{
+            gap: isForDownload
+              ? '40px'
+              : `${24 * scale}px`,
+            marginBottom: isForDownload
+              ? '16px'
+              : `${10 * scale}px`,
+          }}
         >
-          {/* BEĞENİ */}
+          {/* LIKE */}
+
           <button
             type="button"
             aria-label="Vecizeyi beğen"
             className="
               flex
+              cursor-pointer
               items-center
               gap-2
-              cursor-pointer
-              hover:text-primary
-              transition-colors
-              bg-transparent
               border-none
+              bg-transparent
               p-0
+              transition-colors
+              hover:text-primary
             "
             onClick={(event) =>
               handleActionClick(event, 'like')
             }
           >
             <Heart
-              style={
-                !isForDownload
-                  ? {
-                      width: `${18 * scale}px`,
-                      height: `${18 * scale}px`,
-                    }
-                  : {
-                      width: '28px',
-                      height: '28px',
-                    }
-              }
               className="
                 stroke-[2.5]
                 text-shadow-heavy
               "
+              style={{
+                width: isForDownload
+                  ? '28px'
+                  : `${18 * scale}px`,
+                height: isForDownload
+                  ? '28px'
+                  : `${18 * scale}px`,
+              }}
             />
 
             <span
@@ -553,55 +634,52 @@ export function VecizeCard({
                 font-extrabold
                 text-shadow-heavy
               "
-              style={
-                !isForDownload
-                  ? {
-                      fontSize: `${15 * scale}px`,
-                    }
-                  : {
-                      fontSize: '22px',
-                    }
-              }
+              style={{
+                fontSize: isForDownload
+                  ? '22px'
+                  : `${15 * scale}px`,
+              }}
             >
               0
             </span>
           </button>
 
-          {/* YORUM */}
+          {/* COMMENT */}
+
           <button
             type="button"
             aria-label="Vecizeye yorum yap"
             className="
               flex
+              cursor-pointer
               items-center
               gap-2
-              cursor-pointer
-              hover:text-primary
-              transition-colors
-              bg-transparent
               border-none
+              bg-transparent
               p-0
+              transition-colors
+              hover:text-primary
             "
             onClick={(event) =>
-              handleActionClick(event, 'comment')
+              handleActionClick(
+                event,
+                'comment'
+              )
             }
           >
             <MessageCircle
-              style={
-                !isForDownload
-                  ? {
-                      width: `${18 * scale}px`,
-                      height: `${18 * scale}px`,
-                    }
-                  : {
-                      width: '28px',
-                      height: '28px',
-                    }
-              }
               className="
                 stroke-[2.5]
                 text-shadow-heavy
               "
+              style={{
+                width: isForDownload
+                  ? '28px'
+                  : `${18 * scale}px`,
+                height: isForDownload
+                  ? '28px'
+                  : `${18 * scale}px`,
+              }}
             />
 
             <span
@@ -609,59 +687,51 @@ export function VecizeCard({
                 font-extrabold
                 text-shadow-heavy
               "
-              style={
-                !isForDownload
-                  ? {
-                      fontSize: `${15 * scale}px`,
-                    }
-                  : {
-                      fontSize: '22px',
-                    }
-              }
+              style={{
+                fontSize: isForDownload
+                  ? '22px'
+                  : `${15 * scale}px`,
+              }}
             >
               0
             </span>
           </button>
         </div>
 
-        {/* =====================================================
+        {/* =================================================
             KAYNAK
-        ====================================================== */}
+        ================================================== */}
+
         <div
-          className={cn(
-            'w-full flex items-center justify-center',
-            isForDownload ? 'pb-4' : 'pb-2'
-          )}
-          style={
-            !isForDownload
-              ? {
-                  paddingBottom: `${6 * scale}px`,
-                }
-              : undefined
-          }
+          className="flex w-full items-center justify-center"
+          style={{
+            paddingBottom: isForDownload
+              ? '16px'
+              : `${6 * scale}px`,
+          }}
         >
           <p
             className="
-              text-slate-400
-              font-black
-              tracking-[0.25em]
-              uppercase
               text-center
+              font-black
+              uppercase
+              tracking-[0.25em]
+              text-slate-400
               text-shadow-heavy
               opacity-95
             "
-            style={
-              !isForDownload
-                ? {
-                    fontSize: `${
-                      (isMobile ? 8 : 10) * scale
-                    }px`,
-                  }
-                : {
-                    fontSize: '16px',
-                    letterSpacing: '0.3em',
-                  }
-            }
+            style={{
+              fontSize: isForDownload
+                ? '16px'
+                : `${
+                    (isMobile ? 8 : 10) *
+                    scale
+                  }px`,
+              letterSpacing:
+                isForDownload
+                  ? '0.3em'
+                  : undefined,
+            }}
           >
             {article.source ||
               'BEDİÜZZAMAN SAİD NURSİ'}
@@ -671,28 +741,49 @@ export function VecizeCard({
     </Card>
   );
 
-  {/* =========================================================
-      KARTI LİNK İÇİNE AL
-  ========================================================== */}
+  // =========================================================
+  // LINK
+  // =========================================================
+
+  if (isLink && !isForDownload) {
+    return (
+      <div
+        className={cn(
+          'group/outer h-full w-full'
+        )}
+      >
+        <Link
+          href={`/posts/${article.id}`}
+          className="
+            block
+            h-full
+            w-full
+            rounded-[2.5rem]
+            outline-none
+            focus-visible:ring-2
+            focus-visible:ring-primary
+            focus-visible:ring-offset-2
+          "
+          aria-label={
+            article.title
+              ? `${article.title} detayını görüntüle`
+              : 'Vecize detayını görüntüle'
+          }
+        >
+          {card}
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
-        'group/outer h-full w-full flex flex-col',
+        'h-full w-full',
         isForDownload && 'p-0'
       )}
     >
-      {isLink && !isForDownload ? (
-        <Link
-          href={`/posts/${article.id}`}
-          className="h-full w-full block"
-          aria-label={`${article.title || 'Vecize'} detayını görüntüle`}
-        >
-          {CardContent}
-        </Link>
-      ) : (
-        CardContent
-      )}
+      {card}
     </div>
   );
 }
