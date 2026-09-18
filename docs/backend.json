@@ -1,0 +1,271 @@
+{
+  "entities": {
+    "Content": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Content",
+      "type": "object",
+      "description": "Represents content created and managed within the Nurlu Platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Content entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the content."
+        },
+        "text": {
+          "type": "string",
+          "description": "The main body text of the content."
+        },
+        "ottomanContent": {
+          "type": "string",
+          "description": "The content's text in Ottoman script."
+        },
+        "cardStyle": {
+          "type": "number",
+          "description": "The visual style for the aphorism card (1-10)."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Content)"
+        },
+        "topicIds": {
+          "type": "array",
+          "description": "References to Topics. (Relationship: Topic N:N Content)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags. (Relationship: Tag N:N Content)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the content (e.g., draft, published)."
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "Date and time when the content was created.",
+          "format": "date-time"
+        },
+        "updatedDate": {
+          "type": "string",
+          "description": "Date and time when the content was last updated.",
+          "format": "date-time"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the content's image, hosted on Firebase Storage.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "text",
+        "cardStyle",
+        "categoryId",
+        "topicIds",
+        "tagIds",
+        "status",
+        "createdDate",
+        "updatedDate"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category for content organization.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Topic": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Topic",
+      "type": "object",
+      "description": "Represents a topic associated with content.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Topic entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the topic."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the topic."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Tag": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tag",
+      "type": "object",
+      "description": "Represents a tag associated with content.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Tag entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the tag."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the tag."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "NewsletterSubscription": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "NewsletterSubscription",
+      "type": "object",
+      "description": "Represents a user's subscription to the newsletter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the NewsletterSubscription entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the subscriber.",
+          "format": "email"
+        },
+        "subscriptionDate": {
+          "type": "string",
+          "description": "Date and time when the user subscribed.",
+          "format": "date-time"
+        },
+        "isSubscribed": {
+          "type": "boolean",
+          "description": "Indicates whether the subscription is active."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "subscriptionDate",
+        "isSubscribed"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "articles/{articleId}",
+        "definition": {
+          "entityName": "Content",
+          "schema": {
+            "$ref": "#/backend/entities/Content"
+          },
+          "description": "Collection of articles. Each document represents a single article.",
+          "params": [
+            {
+              "name": "articleId",
+              "description": "Unique identifier for the article."
+            }
+          ]
+        }
+      },
+      {
+        "path": "categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Collection of categories for organizing article content.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "Unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "topics/{topicId}",
+        "definition": {
+          "entityName": "Topic",
+          "schema": {
+            "$ref": "#/backend/entities/Topic"
+          },
+          "description": "Collection of topics associated with article content.",
+          "params": [
+            {
+              "name": "topicId",
+              "description": "Unique identifier for the topic."
+            }
+          ]
+        }
+      },
+      {
+        "path": "tags/{tagId}",
+        "definition": {
+          "entityName": "Tag",
+          "schema": {
+            "$ref": "#/backend/entities/Tag"
+          },
+          "description": "Collection of tags associated with article content.",
+          "params": [
+            {
+              "name": "tagId",
+              "description": "Unique identifier for the tag."
+            }
+          ]
+        }
+      },
+      {
+        "path": "newsletterSubscriptions/{subscriptionId}",
+        "definition": {
+          "entityName": "NewsletterSubscription",
+          "schema": {
+            "$ref": "#/backend/entities/NewsletterSubscription"
+          },
+          "description": "Collection of newsletter subscriptions.",
+          "params": [
+            {
+              "name": "subscriptionId",
+              "description": "Unique identifier for the newsletter subscription."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

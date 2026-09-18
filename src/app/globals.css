@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 24 96% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 100%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 24 96% 53%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 24 96% 53%;
+    --radius: 3.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 24 96% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 6%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 24 96% 53%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 24 96% 53%;
+  }
+}
+
+@layer base {
+  * { border-color: hsl(var(--border)); }
+  body { @apply bg-[#f8f9fa] text-foreground antialiased selection:bg-primary/20; }
+}
+
+@layer utilities {
+  .text-shadow-drop {
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.06);
+  }
+  .text-shadow-heavy {
+    text-shadow: 0px 6px 16px rgba(0, 0, 0, 0.2), 0px 12px 32px rgba(0, 0, 0, 0.15);
+  }
+  .shadow-modern {
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.12), 0 18px 36px -18px rgba(0, 0, 0, 0.1);
+  }
+  .shadow-deep {
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.2), 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+[data-html2canvas-ignore="true"] { display: none !important; }
+
+/* ==========================================================================
+   1080x1920 Instagram Story Ana Tuval Sınıfları
+   ========================================================================== */
+.story-card-modern {
+  width: 1080px;
+  height: 1920px;
+  box-sizing: border-box;
+  background: #090d16;
+  color: #f1f5f9;
+  padding: 140px 75px 120px 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  position: relative;
+}
+
+.story-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.story-pill {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  padding: 10px 28px;
+  border-radius: 100px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.story-step-num {
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #475569;
+}
+
+.story-main-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.story-problem-text {
+  font-size: 1.8rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.story-quotes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.story-quote-item {
+  background: #111827;
+  border-left: 6px solid #38bdf8;
+  padding: 20px 24px;
+  border-radius: 0 16px 16px 0;
+  text-align: left;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.story-quote-item.ayet { border-left-color: #10b981; }
+.story-quote-item.hadis { border-left-color: #f59e0b; }
+
+.story-quote-label {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.story-quote-item p {
+  font-size: 1.65rem;
+  color: #e2e8f0;
+  line-height: 1.4;
+  margin: 0;
+  font-style: italic;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.story-quote-item cite {
+  display: block;
+  font-size: 1.35rem;
+  color: #64748b;
+  margin-top: 8px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.story-maddeler {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.story-madde-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 1.55rem;
+  color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.story-madde-row strong {
+  color: #38bdf8;
+}
+
+.story-footer-logo {
+  text-align: center;
+  opacity: 0.5;
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  font-size: 1.2rem;
+  margin-top: 20px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
